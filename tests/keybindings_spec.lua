@@ -16,8 +16,8 @@ describe('Test keybind creation', function()
         local key_b = 'b'
         local key_c = 'c'
 
-        keybindings.create_keybinding('n', key_a, ':echo "a key pressed"<CR>', false)
-        keybindings.create_keybinding('n', key_b, ':echo "b key pressed"<CR>', true)
+        keybindings.create_keybinding('n', key_a, ':echo "a key pressed"<CR>')
+        keybindings.create_keybinding('n', key_b, ':echo "b key pressed"<CR>')
         keybindings.create_keybinding('v', key_c, 'c', false)
 
         assert(keybinding_exists('n', key_a), 'Keybinding "' .. key_a .. '" not created successfully')
@@ -28,8 +28,8 @@ describe('Test keybind creation', function()
     it('should create keybindings with and without override', function()
         local key_d = 'd'
 
-        keybindings.create_keybinding('n', key_d, ':echo "d key pressed"<CR>', false)
-        keybindings.create_keybinding('n', key_d, ':echo "d key overridden"<CR>', true)
+        keybindings.create_keybinding('n', key_d, ':echo "d key pressed"<CR>', { override = false })
+        keybindings.create_keybinding('n', key_d, ':echo "d key overridden"<CR>', { override = true })
 
         assert(keybinding_exists('n', key_d), 'Keybinding "' .. key_d .. '" not overridden successfully')
     end)
