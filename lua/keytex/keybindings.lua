@@ -2,6 +2,10 @@ local M = {
     global_keybindings = {}
 }
 
+function M.setup()
+    vim.api.nvim_create_user_command("Printkb", M.print_keybindings, {})
+end
+
 function M.create_keybinding(mode, key, action, options, should_output)
     options = options or {
         -- Defaults
