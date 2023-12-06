@@ -4,6 +4,32 @@ local M = {
 
 function M.setup()
     vim.api.nvim_create_user_command("Printkb", M.print_keybindings, {})
+    vim.api.nvim_create_user_command("Inputkb",
+        function()
+            local mode = vim.fn.input("Mode: ")
+            local key = vim.fn.input("Key: ")
+            local action = vim.fn.input("Action: ")
+
+            local success, options = pcall(function()
+                return vim.fn.json_decode(vim.fn.input("Options (JSON format): "))
+            end)
+
+            if not success then
+                options = {}
+            end
+
+            local should_output = false
+            if vim.fn.input("Should Output: "):lower() == 'true' then
+                should_output = true
+                print("\n")
+            end
+
+            M.create_keybinding(mode, key, action, options, should_output)
+
+        end,
+        {}
+    )
+
 end
 
 function M.create_keybinding(mode, key, action, options, should_output)
