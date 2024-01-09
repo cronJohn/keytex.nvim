@@ -60,7 +60,7 @@ function M.create_keybinding(mode, key, action, options, should_output)
     local existing_mapping = vim.fn.maparg(keymap, mode)
 
     if user_override or existing_mapping == '' then
-        vim.api.nvim_set_keymap(mode, key, action, options)
+        vim.keymap.set(mode, key, action, options)
         if should_output then
             print(string.format('Keybinding %s created successfully!', keymap))
         end
