@@ -56,10 +56,7 @@ function M.create_keybinding(mode, key, action, options, should_output)
         line = info.currentline
     }
 
-    local keymap = string.format('<%s-%s>', mode, key)
-    local existing_mapping = vim.fn.maparg(keymap, mode)
-
-    if user_override or existing_mapping == '' then
+    if user_override or M.check_mapping_existence(mode, key) then
         vim.keymap.set(mode, key, action, options)
         if should_output then
             print(string.format('Keybinding %s created successfully!', keymap))
@@ -83,5 +80,18 @@ function M.print_keybindings()
         ))
     end
 end
+
+function M.check_mapping_existence(modes, key)
+    local all_modes = type(modes) == 'table' and modes or {modes} -- Convert modes to a single item table if it's a string
+
+    for _, mode in ipairs(all_modes) do
+        if vim.fn.maparg(string.format('<%s-%s>', mode, key), mode) ~= '' then
+            return true
+        end
+    end
+
+    return false
+end
+
 
 return M
