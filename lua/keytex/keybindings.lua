@@ -32,21 +32,21 @@ function M.setup()
 
 end
 
+-- @param mode string|table: Mode short-name or a list of modes.
+-- @param key string: The key combination for the keybinding.
+-- @param action string|function: The action to be triggered by the keybinding.
+-- @param options table|nil: Optional table of |:map-arguments|.
+-- @param should_output boolean|nil: Optional flag to control whether to log keybind creation
 function M.create_keybinding(mode, key, action, options, should_output)
     options = options or {
         -- Defaults
-        override = false,
-        noremap = true,
-        silent = true
+        unique = true,
     }
 
     should_output = should_output or false
 
-    local user_override = options.override
-    -- Must remove override from options table before passing to nvim_set_keymap
-    options.override = nil
-
     local info = debug.getinfo(2, 'Sl')
+    local keymap = string.format('<%s-%s>', mode, key)
 
     local metadata = {
         mode = mode,
@@ -56,16 +56,20 @@ function M.create_keybinding(mode, key, action, options, should_output)
         line = info.currentline
     }
 
-    if user_override or M.check_mapping_existence(mode, key) then
+    local is_set, error = pcall(function()
         vim.keymap.set(mode, key, action, options)
-        if should_output then
-            print(string.format('Keybinding %s created successfully!', keymap))
-        end
+    end)
+
+    local output = ''
+
+    if is_set then
+        output = string.format('Keybinding %s created successfully!', keymap)
     else
-        if should_output then
-            print(string.format('Keybinding %s already exists. Skipping...', keymap))
-        end
-        return
+        output = tostring(error)
+    end
+
+    if should_output then
+        print(output)
     end
 
     M.global_keybindings[keymap] = metadata
