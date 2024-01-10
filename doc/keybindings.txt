@@ -1,0 +1,52 @@
+================================================================================
+                                                            *keybindings.nvim*
+
+This plugin let's you create keybindings that won't conflict with other
+keybindings that you set. See examples below:
+
+
+                                             *keybindings.create_keybinding()*
+create_keybinding({mode}, {key}, {action}, {opts}, {should_output})     
+    Adds a new keybinding in {mode} under {key} doing {action}. Essentially
+    a wrapper around |vim.keymap.set()| with `unique=true`. Examples: >lua
+
+        local kb = require('keytex.keybindings')
+
+        -- Map to a Lua function:
+        kb.create_keybinding('n', 'key', function() print("real lua function") end)
+
+        -- Map to multiple modes:
+        kb.create_keybinding({'n', 'v'}, '<leader>lr', vim.lsp.buf.references)
+
+        -- Buffer-local mapping:
+        kb.create_keybinding('n', '<leader>w', "<cmd>w<cr>", { buffer = 5 })
+<
+
+    Parameters:  
+      • {mode}    (string|table) Mode short-name, see |vim.keymap.set()|. Can
+                  also be list of modes to create mapping on multiple modes.
+      • {key}     (string) The key for the keybinding.
+      • {action}  (string|function) What you want the keybinding to do. Can
+                  be a lua function
+      • {opts}    (table|nil) Table of |:map-arguments|. Optional
+      • {should_output}  (boolean|nil) If true, log whether you successfully
+                         created the keybinding or not. Default is `false`. Optional
+
+
+                                             *keybindings.print_keybindings()*
+print_keybindings()                 
+    Prints all keybindings made using |keybindings.create_keybinding()|. Examples: >lua
+
+        local kb = require('keytex.keybindings')
+
+        -- Map to a Lua function:
+        kb.create_keybinding('n', 'key', function() print("real lua function") end)
+
+        kb.print_keybindings()
+        -- Should output something like
+        --Mode: n  | Key: <n-key>  | Action: function: 0x#    | Source: @some_path | Line: #
+<
+
+
+
+ vim:tw=78:ts=8:ft=help:norl:
