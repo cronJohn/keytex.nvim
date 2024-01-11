@@ -41,6 +41,7 @@ function M.create_keybinding(mode, key, action, options, should_output)
     options = options or {
         -- Defaults
         unique = true,
+        desc = "None",
     }
 
     should_output = should_output or false
@@ -52,6 +53,7 @@ function M.create_keybinding(mode, key, action, options, should_output)
         mode = mode,
         key = key,
         action = action,
+        description = options.desc,
         source = info.source,
         line = info.currentline
     }
@@ -79,8 +81,8 @@ function M.print_keybindings()
     print('Current Keybindings:')
     for key, metadata in pairs(M.global_keybindings) do
         print(string.format(
-            'Mode: %-2s | Key: %-15s | Action: %-25s | Source: %-30s | Line: %s',
-            metadata.mode, key, metadata.action, metadata.source, metadata.line
+            'Mode: %-2s | Key: %-15s | Action: %-25s | Desc: %-25s | Source: %-30s | Line: %s',
+            metadata.mode, key, metadata.action, metadata.description, metadata.source, metadata.line
         ))
     end
 end
