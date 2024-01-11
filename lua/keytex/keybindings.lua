@@ -47,14 +47,16 @@ function M.create_keybinding(mode, key, action, options, should_output)
     should_output = should_output or false
 
     local info = debug.getinfo(2, 'Sl')
-    local keymap = string.format('<%s-%s>', mode, key)
+    local keymap = string.format("<%s-%s> -> %s | ℹ️ : '%s'", mode, key, action, options.desc)
+
 
     local metadata = {
         mode = mode,
         key = key,
         action = action,
         description = options.desc,
-        source = info.source,
+        fqn = keymap,
+        source = info.source:sub(2),
         line = info.currentline
     }
 
@@ -74,15 +76,15 @@ function M.create_keybinding(mode, key, action, options, should_output)
         print(output)
     end
 
-    M.global_keybindings[keymap] = metadata
+    table.insert(M.global_keybindings, metadata)
 end
 
 function M.print_keybindings()
     print('Current Keybindings:')
-    for key, metadata in pairs(M.global_keybindings) do
+    for _, metadata in ipairs(M.global_keybindings) do
         print(string.format(
             'Mode: %-2s | Key: %-15s | Action: %-25s | Desc: %-25s | Source: %-30s | Line: %s',
-            metadata.mode, key, metadata.action, metadata.description, metadata.source, metadata.line
+            vim.inspect(metadata.mode), metadata.key, metadata.action, metadata.description, metadata.source, metadata.line
         ))
     end
 end
