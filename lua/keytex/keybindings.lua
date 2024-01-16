@@ -55,13 +55,17 @@ function M.setup()
 --   - `mark` (boolean): If true, add the keybinding to the global list without attempting to create it (default: false).
 --   - `output` (boolean): If true, print keybinding creation status to the console (default: false).
 function M.create_keybinding(mode, key, action, vks_opt, usr_opt)
+    local function is_usable(table)
+        return table and next(table) ~= nil
+    end
+
     -- Defaults
-    vks_opt = vks_opt or {
+    vks_opt = is_usable(vks_opt) and vks_opt or {
         unique = true,
         desc = "None",
     }
 
-    usr_opt = usr_opt or {
+    usr_opt = is_usable(usr_opt) and usr_opt or {
         mark = false,
         output = false,
     }
