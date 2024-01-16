@@ -63,14 +63,14 @@ function M.create_keybinding(mode, key, action, vks_opt, usr_opt)
     }
 
     local info = debug.getinfo(2, 'Sl')
-    local keymap = string.format("<%s-%s> -> %s | ℹ️ : '%s'", mode, key, action, vks_opt.desc)
+    local keybinding = string.format("<%s-%s> -> %s | ℹ️ : '%s'", mode, key, action, vks_opt.desc)
 
     local metadata = {
         mode = mode,
         key = key,
         action = action,
         description = vks_opt.desc,
-        fqn = keymap,
+        fqn = keybinding,
         source = info.source:sub(2),
         line = info.currentline
     }
@@ -84,7 +84,7 @@ function M.create_keybinding(mode, key, action, vks_opt, usr_opt)
         vim.keymap.set(mode, key, action, vks_opt)
     end)
 
-    local output = tostring(error) or string.format('Keybinding %s created successfully!', keymap)
+    local output = tostring(error) or string.format('Keybinding %s created successfully!', keybinding)
 
     if not is_set then
         table.insert(M.error_log, error)
@@ -128,9 +128,9 @@ function M.check_mapping_existence(modes, key)
     local all_modes = type(modes) == 'table' and modes or {modes} -- Convert modes to a single item table if it's a string
 
     for _, mode in ipairs(all_modes) do
-        local keymap = vim.api.nvim_get_keymap(mode)
+        local keybinding = vim.api.nvim_get_keymap(mode)
 
-        for _, mapping in ipairs(keymap) do
+        for _, mapping in ipairs(keybinding) do
             if mapping.lhs == key then
                 return true
             end

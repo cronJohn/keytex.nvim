@@ -1,0 +1,32 @@
+================================================================================
+                                                            *finder.nvim*
+
+This module provides functions for finding and exploring keybindings using Telescope
+
+                                             *finder.keybinding_picker()*
+keybinding_picker({filter}, {opts})
+    Opens a Telescope window and filters using *key* by default. Upon selecting
+    a Telescope entry, you will be taken to the exact file and line number
+    of where that keybinding was created using keytex. Examples: >lua
+
+        local finder = require('keytex.finder')
+
+        -- Filter by mode
+        finder.keybinding_picker('mode')
+
+        -- Filter by description
+        finder.keybinding_picker('description')
+<
+
+    Parameters:  
+      • {filter}    (string) The initial filtering method. It can be one of the following:
+        - `mode`: Filters by the mode the keybinding is in (e.g., *n*ormal, *v*isual, *i*nsert).
+        - `key`: Filters by the key combination.
+        - `action`: Filters by what the keybinding maps to.
+        - `description`: Filters by the description of the keybinding.
+        - `source`: Filters by the file where the keybinding is defined.
+        - `line`: Filters by the line number where the keybinding is located.
+      • {opts}      (table) Optional table of configuration options for Telescope.
+
+   
+ vim:tw=78:ts=8:ft=help:norl:

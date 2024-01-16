@@ -6,12 +6,24 @@ local action_state = require "telescope.actions.state"
 
 local M = {}
 
-function M.keymap_picker(opts, filter)
-    opts = opts or {}
+---
+-- Opens a Telescope window for searching and exploring keybindings.
+--
+-- @param filter string: The initial filtering method. It can be one of the following:
+--   - `mode`: Filters by the mode the keybinding is in (e.g., *n*ormal, *v*isual, *i*nsert).
+--   - `key`: Filters by the key combination.
+--   - `action`: Filters by what the keybinding maps to.
+--   - `description`: Filters by the description of the keybinding.
+--   - `source`: Filters by the file where the keybinding is defined.
+--   - `line`: Filters by the line number where the keybinding is located.
+-- @param opts table: Optional table of configuration options for Telescope.
+
+function M.keybinding_picker(filter, opts)
     filter = filter or "key"
+    opts = opts or {}
 
     pickers.new(opts, {
-        prompt_title = "Keymappings",
+        prompt_title = "Keybindings",
         finder = finders.new_table{
             results = require('keytex.keybindings').global_keybindings,
             entry_maker = function(entry)

@@ -67,16 +67,18 @@ use {
     - Creates a normal mode keybinding using `key` and `someFunc` regardless if it exists or not
 
 ## Search keybindings
-- `require('keytex.finder').keymap_picker()` opens a telescope window and filters using *key* by default
-    - To use a different filtering method, pass one of the following strings as a second argument to the function:
-        - `mode` | The mode it is in, e.g., *n*ormal, *v*isual, *i*nsert
-        - `key`
-        - `action` | What it maps to
-        - `description`
-        - `source` | What file it is in
-        - `line` | What line number it's at
+- `require('keytex.finder').keybinding_picker(<filter>, <opts>)` opens a telescope window and filters using *key* by default
+    - `filter` changes the filtering method when set to the following strings:
+      - `mode`: Filters by the mode it is in (e.g., *n*ormal, *v*isual, *i*nsert).
+      - `key`: Filters by the key combination (default).
+      - `action`: Filters by what the keybinding maps to.
+      - `description`: Filters by the description of the keybinding.
+      - `source`: Filters by the file where the keybinding is defined.
+      - `line`: Filters by the line number where the keybinding is located.
+    - `opts` is an optional table of additional options for telescope
+
 
 ### Examples
-- `require('keytex.finder').keymap_picker({}, 'mode')` searches all keybindings based the mode
+- `require('keytex.finder').keybinding_picker('mode')` searches all keybindings based on the mode
     - Typing something like `n` would only show all *normal* mode keybindings
 
