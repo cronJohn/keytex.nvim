@@ -1,7 +1,21 @@
 local M = {
-    global_keybindings = {}
+    global_keybindings = {},
+    error_log          = {}
 }
 
+---
+-- Sets up user commands for managing keybindings.
+-- - Creates the "Printkb" command to print a list of global keybindings.
+-- - Creates the "Inputkb" command to interactively input and create a new keybinding.
+--
+-- The "Inputkb" command prompts the user for the mode, key, action, options (in JSON format),
+-- and whether the keybinding creation status should be output.
+--
+-- Usage:
+-- ```
+-- :Printkb          " Prints a list of global keybindings
+-- :Inputkb          " Prompts the user for keybinding details and creates a new keybinding
+-- ```
 function M.setup()
     vim.api.nvim_create_user_command("Printkb", M.print_keybindings, {})
     vim.api.nvim_create_user_command("Inputkb",
@@ -18,68 +32,83 @@ function M.setup()
                 options = {}
             end
 
-            local should_output = false
-            if vim.fn.input("Should Output: "):lower() == 'true' then
-                should_output = true
-                print("\n")
-            end
+            local should_output = vim.fn.input("Should Output (true/false): "):lower() == 'true'
 
-            M.create_keybinding(mode, key, action, options, should_output)
+            M.create_keybinding(mode, key, action, options, {output = should_output})
 
-        end,
-        {}
-    )
-
+        end, {})
 end
 
+
+---
+-- Creates a keybinding using the specified mode, key, and action.
+--
 -- @param mode string|table: Mode short-name or a list of modes.
 -- @param key string: The key combination for the keybinding.
 -- @param action string|function: The action to be triggered by the keybinding.
--- @param options table|nil: Optional table of |:map-arguments|.
--- @param should_output boolean|nil: Optional flag to control whether to log keybind creation
-function M.create_keybinding(mode, key, action, options, should_output)
-    options = options or {
-        -- Defaults
+-- @param vks_opt table: Options specific to vim.keymap.set (|:map-arguments|).
+-- @param usr_opt table: Optional table to control function behavior.
+--   - `mark` (boolean): If true, add the keybinding to the global list without attempting to create it (default: false).
+--   - `output` (boolean): If true, print keybinding creation status to the console (default: false).
+function M.create_keybinding(mode, key, action, vks_opt, usr_opt)
+    -- Defaults
+    vks_opt = vks_opt or {
         unique = true,
         desc = "None",
     }
 
-    should_output = should_output or false
+    usr_opt = usr_opt or {
+        mark = false,
+        output = false,
+    }
 
     local info = debug.getinfo(2, 'Sl')
-    local keymap = string.format("<%s-%s> -> %s | ℹ️ : '%s'", mode, key, action, options.desc)
-
+    local keymap = string.format("<%s-%s> -> %s | ℹ️ : '%s'", mode, key, action, vks_opt.desc)
 
     local metadata = {
         mode = mode,
         key = key,
         action = action,
-        description = options.desc,
+        description = vks_opt.desc,
         fqn = keymap,
         source = info.source:sub(2),
         line = info.currentline
     }
 
+    if usr_opt.mark then
+        table.insert(M.global_keybindings, metadata)
+        return
+    end
+
     local is_set, error = pcall(function()
-        vim.keymap.set(mode, key, action, options)
+        vim.keymap.set(mode, key, action, vks_opt)
     end)
 
-    local output = ''
+    local output = tostring(error) or string.format('Keybinding %s created successfully!', keymap)
 
-    if is_set then
-        output = string.format('Keybinding %s created successfully!', keymap)
+    if not is_set then
+        table.insert(M.error_log, error)
     else
-        output = tostring(error)
+        table.insert(M.global_keybindings, metadata)
     end
 
-    if should_output then
+    if usr_opt.output then
         print(output)
     end
-
-    table.insert(M.global_keybindings, metadata)
 end
 
+
+---
+-- Prints the current global keybindings.
+--
+-- If there are no keybindings, it prints a message indicating that no keybindings were found.
+--
 function M.print_keybindings()
+    if #M.global_keybindings == 0 then
+        print('No keybindings found.')
+        return
+    end
+
     print('Current Keybindings:')
     for _, metadata in ipairs(M.global_keybindings) do
         print(string.format(
@@ -89,17 +118,26 @@ function M.print_keybindings()
     end
 end
 
+---
+-- Checks if a keybinding exists for the specified mode and key combination.
+--
+-- @param modes string|table: Mode short-name or a list of modes.
+-- @param key string: The key combination to check for.
+-- @return boolean: True if the keybinding exists in any of the specified modes, false otherwise.
 function M.check_mapping_existence(modes, key)
     local all_modes = type(modes) == 'table' and modes or {modes} -- Convert modes to a single item table if it's a string
 
     for _, mode in ipairs(all_modes) do
-        if vim.fn.maparg(string.format('<%s-%s>', mode, key), mode) ~= '' then
-            return true
+        local keymap = vim.api.nvim_get_keymap(mode)
+
+        for _, mapping in ipairs(keymap) do
+            if mapping.lhs == key then
+                return true
+            end
         end
     end
 
     return false
 end
-
 
 return M

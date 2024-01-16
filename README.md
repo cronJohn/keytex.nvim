@@ -41,11 +41,12 @@ use {
 - Run `require('keytex.keybindings').setup()` to setup user commands.
 
 ## Create keybindings
-- `require('keytex.keybindings').create_keybinding(<mode>, <key>, <action>, <options>, <should_output>)` creates a unique keybinding
+- `require('keytex.keybindings').create_keybinding(<mode>, <key>, <action>, <vks_opt>, <usr_opt>)` creates a unique keybinding
     - You can also set `require('keytex.keybindings').create_keybinding` to something like `m` and call it like `m(...)`
-    - `options` is an optional table of `:map-arguments` 
-    - `should_output` is a boolean defaulted to *false*. If true, log the keybind creation
-
+    - `vks_opt` is an optional table of `vim.keymap.set` options (|:map-arguments|)
+    - `usr_opt` is an optional table to control function behavior
+        - `mark` (boolean): If true, add the keybinding to the global list without attempting to create it (default: false).
+        - `output` (boolean): If true, print keybinding creation status to the console (default: false).
 ### Examples
 - `require('keytex.keybindings').create_keybinding('n', '<leader>ph', ':lua print("hey")<CR>')`
     - Prints `hey` in normal mode whenever `<leader>ph` is pressed
@@ -59,7 +60,7 @@ use {
 - `require('keytex.keybindings').create_keybinding('n', key, someFunc, {desc = 'Foo Bar'})`
     - Creates a normal mode keybinding with a description of `Foo Bar`
 
-- `require('keytex.keybindings').create_keybinding('n', key, someFunc, {}, true)`
+- `require('keytex.keybindings').create_keybinding('n', key, someFunc, {}, {output=true})`
     - Attempts to create this keybinding and logs, i.e., `print`s whether it was successful or not
 
 - `require('keytex.keybindings').create_keybinding('n', key, someFunc, {unique = false})`

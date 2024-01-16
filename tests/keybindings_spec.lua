@@ -1,20 +1,6 @@
 local keybindings = require('keytex.keybindings')
+local check_exists = require('keytex.keybindings').check_mapping_existence
 
-local function keybinding_exists(mode, key)
-    local modes = type(mode) == 'table' and mode or {mode}
-
-    for _, current_mode in ipairs(modes) do
-        local keymap = vim.api.nvim_get_keymap(current_mode)
-
-        for _, mapping in ipairs(keymap) do
-            if mapping.lhs == key then
-                return true
-            end
-        end
-    end
-
-    return false
-end
 
 describe('Test keybind creation', function()
     it('should create keybindings', function()
@@ -27,13 +13,13 @@ describe('Test keybind creation', function()
 
         keybindings.create_keybinding('n', key_1, ':echo "key 1"')
         keybindings.create_keybinding('n', key_2, ':echo "key 2"')
-        keybindings.create_keybinding(key_3_mode_table, key_3, ':echo "key 3"')
+        keybindings.create_keybinding(key_3_mode_table, key_3, ':echo "key 3"', {})
         keybindings.create_keybinding(key_4_mode_table, key_4, ':echo "key 4"', {})
 
-        assert(keybinding_exists('n', key_1), 'Keybinding "' .. key_1 .. '" not created successfully')
-        assert(keybinding_exists('n', key_2), 'Keybinding "' .. key_2 .. '" not created successfully')
-        assert(keybinding_exists(key_3_mode_table, key_3), 'Keybinding "' .. key_3 .. '" not created successfully')
-        assert(keybinding_exists(key_4_mode_table, key_4), 'Keybinding "' .. key_4 .. '" not created successfully')
+        assert(check_exists('n', key_1), 'Keybinding "' .. key_1 .. '" not created successfully')
+        assert(check_exists('n', key_2), 'Keybinding "' .. key_2 .. '" not created successfully')
+        assert(check_exists(key_3_mode_table, key_3), 'Keybinding "' .. key_3 .. '" not created successfully')
+        assert(check_exists(key_4_mode_table, key_4), 'Keybinding "' .. key_4 .. '" not created successfully')
     end)
 
     it("shouldn't create keybindings with unique", function()
