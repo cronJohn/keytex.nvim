@@ -6,6 +6,7 @@ local M = {
 ---
 -- Sets up user commands for managing keybindings.
 -- - Creates the "Printkb" command to print a list of global keybindings.
+-- - Creates the "PrintkbErr" command to print all errors related to `create_keybinding`
 -- - Creates the "Inputkb" command to interactively input and create a new keybinding.
 --
 -- The "Inputkb" command prompts the user for the mode, key, action, options (in JSON format),
@@ -14,10 +15,12 @@ local M = {
 -- Usage:
 -- ```
 -- :Printkb          " Prints a list of global keybindings
+-- :PrintkbErr       " Prints a list of keybinding creation errors
 -- :Inputkb          " Prompts the user for keybinding details and creates a new keybinding
 -- ```
 function M.setup()
     vim.api.nvim_create_user_command("Printkb", M.print_keybindings, {})
+    vim.api.nvim_create_user_command("PrintkbErr", M.print_error_log, {})
     vim.api.nvim_create_user_command("Inputkb",
         function()
             local mode = vim.fn.input("Mode: ")
@@ -117,6 +120,24 @@ function M.print_keybindings()
         ))
     end
 end
+
+
+---
+-- Prints the entries in the error log, if any.
+-- The error log contains information about failed `create_keybinding` attempts.
+function M.print_error_log()
+    if #M.error_log == 0 then
+        print('No errors logged.')
+        return
+    end
+
+    print('Error Log:')
+
+    for _, error_entry in ipairs(M.error_log) do
+        print(error_entry)
+    end
+end
+
 
 ---
 -- Checks if a keybinding exists for the specified mode and key combination.
