@@ -57,7 +57,7 @@ function M.setup()
 function M.create_keybinding(mode, key, action, vks_opt, usr_opt)
     vks_opt = vim.tbl_extend('keep', vks_opt or {}, {
         -- Defaults
-        desc = "None",
+        desc = "No description",
         silent = true,
         unique = true,
     })
@@ -68,7 +68,7 @@ function M.create_keybinding(mode, key, action, vks_opt, usr_opt)
     })
 
     local info = debug.getinfo(2, 'Sl')
-    local keybinding = string.format("<%s-%s> -> %s | ℹ️ : '%s'", mode, key, action, vks_opt.desc)
+    local keybinding = string.format("<%s-%s> -> %s | %s", mode, key, action, vks_opt.desc)
 
     local metadata = {
         mode = mode,
@@ -89,7 +89,7 @@ function M.create_keybinding(mode, key, action, vks_opt, usr_opt)
         vim.keymap.set(mode, key, action, vks_opt)
     end)
 
-    local output = tostring(error) or string.format('Keybinding %s created successfully!', keybinding)
+    local output = error and string.format('\nError setting keymap:\n %s', error) or string.format('\nSuccessfully created:\n %s', keybinding)
 
     if not is_set then
         table.insert(M.error_log, error)
