@@ -55,20 +55,17 @@ function M.setup()
 --   - `mark` (boolean): If true, add the keybinding to the global list without attempting to create it (default: false).
 --   - `output` (boolean): If true, print keybinding creation status to the console (default: false).
 function M.create_keybinding(mode, key, action, vks_opt, usr_opt)
-    local function is_usable(table)
-        return table and next(table) ~= nil
-    end
-
-    -- Defaults
-    vks_opt = is_usable(vks_opt) and vks_opt or {
-        unique = true,
+    vks_opt = vim.tbl_extend('keep', vks_opt or {}, {
+        -- Defaults
         desc = "None",
-    }
-
-    usr_opt = is_usable(usr_opt) and usr_opt or {
+        silent = true,
+        unique = true,
+    })
+    usr_opt = vim.tbl_extend('keep', usr_opt or {}, {
+        -- Defaults
         mark = false,
         output = false,
-    }
+    })
 
     local info = debug.getinfo(2, 'Sl')
     local keybinding = string.format("<%s-%s> -> %s | ℹ️ : '%s'", mode, key, action, vks_opt.desc)
