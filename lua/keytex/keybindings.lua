@@ -22,25 +22,26 @@ function M.setup()
     vim.api.nvim_create_user_command("Printkb", M.print_keybindings, {})
     vim.api.nvim_create_user_command("PrintkbErr", M.print_error_log, {})
     vim.api.nvim_create_user_command("Inputkb",
-        function()
+    function()
             local mode = vim.fn.input("Mode: ")
             local key = vim.fn.input("Key: ")
             local action = vim.fn.input("Action: ")
 
-            local success, options = pcall(function()
-                return vim.fn.json_decode(vim.fn.input("Options (JSON format): "))
-            end)
-
-            if not success then
-                options = {}
+            local function parse_input(input)
+                local success, result = pcall(function() return loadstring("return " .. input)() end)
+                if not success then
+                    table.insert(M.error_log, result)
+                end
+                return success and type(result) == "table" and result or nil
             end
 
-            local should_output = vim.fn.input("Should Output (true/false): "):lower() == 'true'
+            local vks_opt = parse_input(vim.fn.input("VKS options (Lua table format): "))
+            local usr_opt = parse_input(vim.fn.input("User options (Lua table format): "))
 
-            M.create_keybinding(mode, key, action, options, {output = should_output})
+            M.create_keybinding(mode, key, action, vks_opt, usr_opt)
 
         end, {})
-end
+    end
 
 
 ---
