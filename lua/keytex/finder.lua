@@ -19,12 +19,20 @@ local M = {}
 -- @param opts table: Optional table of configuration options for Telescope.
 
 function M.keybinding_picker(filter, opts)
-    filter = filter or "mode-key-action-description"
+    filter = filter or "mode-*key-action-description"
     opts = opts or {}
 
     local formats = {}
-    for format in string.gmatch(filter, "([^%-]+)") do
-        table.insert(formats, format)
+    local ordinal_field = nil
+
+    for _, format in ipairs(vim.fn.split(filter, '-')) do
+        local buf = format
+        if string.find(buf, "*", 1, true) then
+            ordinal_field = buf:gsub("*", "")
+            buf = buf:gsub("*", "")
+        end
+
+        table.insert(formats, buf)
     end
 
     pickers.new(opts, {
@@ -40,7 +48,7 @@ function M.keybinding_picker(filter, opts)
                 return {
                     value = entry,
                     display = table.concat(display_values, " | "),
-                    ordinal = tostring(entry[formats[1]]),
+                    ordinal = ordinal_field and tostring(entry[ordinal_field]) or tostring(entry[formats[1]]),
                     path    = entry.source,
                     lnum    = entry.line,
                 }
