@@ -71,7 +71,7 @@ function M.create_keybinding(mode, key, action, vks_opt, usr_opt)
     local keybinding = string.format("<%s-%s> -> %s | %s", mode, key, action, vks_opt.desc)
 
     local metadata = {
-        mode = mode,
+        mode = vim.inspect(mode),
         key = key,
         action = action,
         description = vks_opt.desc,
