@@ -19,21 +19,28 @@ local M = {}
 -- @param opts table: Optional table of configuration options for Telescope.
 
 function M.keybinding_picker(filter, opts)
-    filter = filter or "key"
+    filter = filter or "mode-key-action-description"
     opts = opts or {}
+
+    local formats = {}
+    for format in string.gmatch(filter, "([^%-]+)") do
+        table.insert(formats, format)
+    end
 
     pickers.new(opts, {
         prompt_title = "Keybindings",
         finder = finders.new_table{
             results = require('keytex.keybindings').global_keybindings,
             entry_maker = function(entry)
+                local display_values = {}
+                for _, format in ipairs(formats) do
+                    table.insert(display_values, tostring(entry[format]))
+                end
+
                 return {
                     value = entry,
-                    display = string.format(
-                        'Mode: %-2s | Key: %-10s | Action: %-10s | Desc: %-10s | Source: %-20s | Line: %s',
-                        vim.inspect(entry.mode), entry.key, entry.action, entry.description, entry.source, entry.line
-                    ),
-                    ordinal = tostring(entry[filter]),
+                    display = table.concat(display_values, " | "),
+                    ordinal = tostring(entry[formats[1]]),
                     path    = entry.source,
                     lnum    = entry.line,
                 }
