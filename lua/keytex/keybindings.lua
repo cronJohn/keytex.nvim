@@ -1,7 +1,12 @@
 local M = {
     global_keybindings = {},
-    error_log          = {}
+    error_log          = {},
+    save_file          = ""
+
 }
+local function log_error(err_msg)
+    table.insert(M.error_log, err_msg)
+end
 
 ---
 -- Sets up user commands for managing keybindings.
@@ -18,7 +23,9 @@ local M = {
 -- :PrintkbErr       " Prints a list of keybinding creation errors
 -- :Inputkb          " Prompts the user for keybinding details and creates a new keybinding
 -- ```
-function M.setup()
+function M.setup(config)
+    M.save_file = config.save_file
+
     vim.api.nvim_create_user_command("Printkb", M.print_keybindings, {})
     vim.api.nvim_create_user_command("PrintkbErr", M.print_error_log, {})
     vim.api.nvim_create_user_command("Inputkb",
@@ -30,15 +37,20 @@ function M.setup()
             local function parse_input(input)
                 local success, result = pcall(function() return loadstring("return " .. input)() end)
                 if not success then
-                    table.insert(M.error_log, result)
+                    log_error(result)
                 end
                 return success and type(result) == "table" and result or nil
             end
 
-            local vks_opt = parse_input(vim.fn.input("VKS options (Lua table format): "))
+            local vks_opt = parse_input(vim.fn.input("VKS options (Lua table format): ")) or {}
             local usr_opt = parse_input(vim.fn.input("User options (Lua table format): "))
 
             M.create_keybinding(mode, key, action, vks_opt, usr_opt)
+
+            -- usr_opt.save is meant solely for this user command
+            if usr_opt ~= nil and usr_opt.save then
+                M.save_to_file(string.format("vim.keymap.set('%s', '%s', %s, %s)\n", mode, key, action, vim.inspect(vks_opt)))
+            end
 
         end, {})
     end
@@ -92,7 +104,7 @@ function M.create_keybinding(mode, key, action, vks_opt, usr_opt)
     local output = error and string.format('\nError setting keymap:\n %s', error) or string.format('\nSuccessfully created:\n %s', keybinding)
 
     if not is_set then
-        table.insert(M.error_log, error)
+        log_error(error)
     else
         table.insert(M.global_keybindings, metadata)
     end
@@ -161,6 +173,28 @@ function M.check_mapping_existence(modes, key)
     end
 
     return false
+end
+
+function M.save_to_file(text_to_write)
+    local err_msg
+    local success, file = pcall(io.open, M.save_file, "a")
+
+    if success and file ~= nil then
+        success, err_msg = pcall(file.write, file, text_to_write)
+
+        if not success then
+            log_error(err_msg)
+        end
+
+        success, err_msg = pcall(file.close, file)
+
+        if not success then
+            log_error(err_msg)
+        end
+    else
+        log_error("Can't open file: " .. file)
+    end
+
 end
 
 return M
