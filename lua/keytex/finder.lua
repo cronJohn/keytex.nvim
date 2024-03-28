@@ -6,6 +6,31 @@ local action_state = require "telescope.actions.state"
 
 local M = {}
 
+local abbr_map = {
+    m = "mode",
+    k = "key",
+    a = "action",
+    d = "description",
+    f = "fqn",
+    s = "source",
+    l = "line"
+}
+
+function M.setup()
+    -- Used for hard coding filter (:FindKeybinding <filter>)
+    vim.api.nvim_create_user_command("FindKeybinding", function(uc_args)
+        M.keybinding_picker(uc_args.args)
+    end, {
+        bang = false,
+        nargs = "?",
+    })
+
+    -- Used for dynamically specifying filter
+    vim.api.nvim_create_user_command("FindKeybindingInput", function()
+        M.keybinding_picker(vim.fn.input("Filter: "))
+    end, {})
+end
+
 ---
 -- Opens a Telescope window for searching and exploring keybindings.
 --
@@ -19,20 +44,20 @@ local M = {}
 -- @param opts table: Optional table of configuration options for Telescope.
 
 function M.keybinding_picker(filter, opts)
-    filter = filter or "mode-*key-action-description"
+    filter = filter ~= "" and filter or "m-k-a-*d"
     opts = opts or {}
 
     local formats = {}
     local ordinal_field = nil
 
     for _, format in ipairs(vim.fn.split(filter, '-')) do
-        local buf = format
-        if string.find(buf, "*", 1, true) then
-            ordinal_field = buf:gsub("*", "")
-            buf = buf:gsub("*", "")
+        -- if there is an *
+        if string.find(format, "*", 1, true) then
+            ordinal_field = abbr_map[format:gsub("*", "")]
+            table.insert(formats, ordinal_field)
+        else
+            table.insert(formats, abbr_map[format] or format)
         end
-
-        table.insert(formats, buf)
     end
 
     pickers.new(opts, {

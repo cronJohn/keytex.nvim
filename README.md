@@ -38,7 +38,7 @@ use {
 
 # Getting Started
 ## Setup
-- Run `require('keytex.keybindings').setup()` to setup user commands.
+- Run `require('keytex').setup()` to setup user commands.
 
 ## Create keybindings
 - `require('keytex.keybindings').create_keybinding(<mode>, <key>, <action>, <vks_opt>, <usr_opt>)` creates a unique keybinding
@@ -81,4 +81,11 @@ use {
 ### Examples
 - `require('keytex.finder').keybinding_picker('mode')` searches all keybindings based on the mode
     - Typing something like `n` would only show all *normal* mode keybindings
+
+---
+# Todo
+- [x] Add ability to specify format string to change how you want the finder to display values 
+- [ ] Allow changes to persist (via writing to config)
+- [ ] Have keytex loaded before even the plugin manager is configured or asap
+
 
